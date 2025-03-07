@@ -9,6 +9,9 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+from unhcv.common import visual_mask, write_im
+from unhcv.common.image import visual_tensor, putText, visual_points
+from unhcv.common.utils import attach_home_root
 
 from isegm.utils.log import logger, TqdmToLogger, SummaryWriterAvg
 from isegm.utils.vis import draw_probmap, draw_points
@@ -137,6 +140,22 @@ class ISTrainer(object):
             self.train_data.sampler.set_epoch(epoch)
 
         log_prefix = 'Train' + self.task_prefix.capitalize()
+
+        show_root = attach_home_root("tmp/simple_click/dataset/show/tmp1")
+        for i, var in enumerate(self.train_data.dataset):
+            image = visual_tensor(var['images'][None], max_value=1, min_value=0, reverse=True)
+            points_valid = np.nonzero(var['points'][:, -1] != -1)[0]
+            points = var['points'][points_valid]
+            fix_color = np.zeros([len(points), 3])
+            fix_color[..., :] = np.array([0, 255, 0])
+            fix_color[points_valid < var['points'].shape[0] // 2] = np.array([255, 0, 0])
+            points_show = visual_points(image, points[:, :2][:, ::-1], stack_axis=1, thickness=5, fix_color=fix_color)
+            mask_show = visual_mask(image, var['instances'][0], stack_axis=1)[-1]
+            show = np.concatenate([image, points_show, mask_show], axis=1)
+            write_im(os.path.join(show_root, f"{i}.jpg"), show)
+            breakpoint()
+            pass
+
         tbar = tqdm(self.train_data, file=self.tqdm_out, ncols=100)\
             if self.is_master else self.train_data
 
@@ -146,6 +165,7 @@ class ISTrainer(object):
         self.net.train()
         train_loss = 0.0
         for i, batch_data in enumerate(tbar):
+            breakpoint()
             global_step = epoch * len(self.train_data) + i
 
             loss, losses_logging, splitted_batch_data, outputs = \

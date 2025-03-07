@@ -70,6 +70,7 @@ class MultiPointSampler(BasePointSampler):
             return
 
         gt_mask, pos_masks, neg_masks = self._sample_mask(sample)
+        assert len(pos_masks) == 1
         binary_gt_mask = gt_mask > 0.5 if self.soft_targets else gt_mask > 0
 
         self.selected_mask = gt_mask
@@ -83,6 +84,7 @@ class MultiPointSampler(BasePointSampler):
             neg_mask_other = np.logical_and(np.logical_not(sample.get_background_mask()),
                                             np.logical_not(binary_gt_mask))
 
+        breakpoint()
         self._neg_masks = {
             'bg': neg_mask_bg,
             'other': neg_mask_other,
@@ -116,13 +118,16 @@ class MultiPointSampler(BasePointSampler):
         pos_masks = [self._positive_erode(x) for x in pos_segments]
         neg_masks = [self._positive_erode(x) for x in neg_segments]
 
+        assert len(neg_masks) == 0
         return gt_mask, pos_masks, neg_masks
 
     def _sample_from_masks_layer(self, obj_id, sample: DSample):
         objs_tree = sample._objects
 
+        assert not self.use_hierarchy
         if not self.use_hierarchy:
             node_mask = sample.get_object_mask(obj_id)
+            assert not self.soft_targets
             gt_mask = sample.get_soft_object_mask(obj_id) if self.soft_targets else node_mask
             return gt_mask, [node_mask], []
 
@@ -139,6 +144,7 @@ class MultiPointSampler(BasePointSampler):
         pos_mask = node_mask.copy()
 
         negative_segments = []
+        breakpoint()
         if node_info['parent'] is not None and node_info['parent'] in objs_tree:
             parent_mask = sample.get_object_mask(node_info['parent'])
             negative_segments.append(np.logical_and(parent_mask, np.logical_not(node_mask)))
@@ -167,6 +173,7 @@ class MultiPointSampler(BasePointSampler):
 
     def sample_points(self):
         assert self._selected_mask is not None
+        breakpoint()
         pos_points = self._multi_mask_sample_points(self._selected_masks,
                                                     is_negative=[False] * len(self._selected_masks),
                                                     with_first_click=self.first_click_center)

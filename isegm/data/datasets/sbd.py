@@ -29,6 +29,7 @@ class SBDDataset(ISDataset):
         image_name = self.dataset_samples[index]
         image_path = str(self._images_path / f'{image_name}.jpg')
         inst_info_path = str(self._insts_path / f'{image_name}.mat')
+        # breakpoint()
 
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

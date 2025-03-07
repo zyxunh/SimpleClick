@@ -1,3 +1,3 @@
-python train.py ./models/iter_mask/plainvit_huge448_cocolvis_itermask.py \
---batch-size=32 \
---ngpus=4
+python train.py ./models/iter_mask/plainvit_base448_sbd_itermask.py \
+--batch-size=2 \
+--ngpus=1

@@ -33,6 +33,7 @@ class CocoLvisDataset(ISDataset):
                                     if sample[0] in allow_images_ids]
 
     def get_sample(self, index) -> DSample:
+        breakpoint()
         image_id, sample = self.dataset_samples[index]
         image_path = self._images_path / f'{image_id}.jpg'
 
